@@ -1,0 +1,431 @@
+/* GridWorld specific styles */
+.grid-container {
+    position: relative;
+    margin: 20px auto;
+    border: 2px solid #333;
+    background: white;
+}
+
+.cell {
+    position: absolute;
+    border: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.cell.start {
+    background-color: #4CAF50 !important;
+    color: white;
+}
+
+.cell.goal {
+    background-color: #FF5722 !important;
+    color: white;
+}
+
+.cell.wall {
+    background-color: #333 !important;
+    color: white;
+}
+
+.cell.agent {
+    background-color: #2196F3 !important;
+    color: white;
+}
+
+.arrow {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* Training status */
+.training-active {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+/* Algorithm cards */
+.algo-card.selected {
+    border-color: #4A90E2;
+    box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+    transform: translateY(-2px);
+}
+
+/* Parameter controls */
+.param-control {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 10px;
+}
+
+/* Tooltip customizations */
+.tooltip-inner {
+    max-width: 300px;
+    text-align: left;
+}
+
+/* Inference panel */
+.inference-panel {
+    background: linear-gradient(135deg, #50C878 0%, #4A90E2 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 20px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .grid-container {
+        width: 300px !important;
+        height: 300px !important;
+    }
+    
+    .cell {
+        font-size: 12px;
+    }
+}
+
+/* GridWorld specific styles */
+.grid-container {
+    position: relative;
+    margin: 20px auto;
+    border: 2px solid #333;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.grid-canvas-container {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #dee2e6;
+}
+
+.cell {
+    position: absolute;
+    border: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.cell.start {
+    background-color: #4CAF50 !important;
+    color: white;
+}
+
+.cell.goal {
+    background-color: #FF5722 !important;
+    color: white;
+}
+
+.cell.wall {
+    background-color: #333 !important;
+    color: white;
+}
+
+.cell.agent {
+    background-color: #2196F3 !important;
+    color: white;
+}
+
+.arrow {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* Training status */
+.training-active {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+/* Algorithm cards */
+.algo-card {
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.algo-card.selected {
+    border-color: #4A90E2;
+    box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+    transform: translateY(-2px);
+}
+
+/* Parameter controls */
+.param-control {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 10px;
+}
+
+/* Tooltip customizations */
+.tooltip-inner {
+    max-width: 300px;
+    text-align: left;
+}
+
+/* Inference panel */
+.inference-panel {
+    background: linear-gradient(135deg, #50C878 0%, #4A90E2 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 20px;
+}
+
+/* Progress bar */
+.progress {
+    height: 25px;
+    border-radius: 12px;
+}
+
+.progress-bar {
+    border-radius: 12px;
+}
+
+/* Control buttons */
+.btn-action {
+    margin: 5px;
+    padding: 10px 20px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .grid-container {
+        width: 100% !important;
+        height: auto !important;
+    }
+    
+    .cell {
+        font-size: 12px;
+    }
+    
+    .btn-action {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
+
+/* style.css - IMPROVED VERSION */
+
+/* Color Variables */
+:root {
+    --primary: #4A90E2;
+    --success: #50C878;
+    --warning: #FFA500;
+    --danger: #FF4136;
+    --info: #17A2B8;
+    --dark: #343A40;
+    --light: #F8F9FA;
+}
+
+/* General Styling */
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.container-fluid {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    margin-top: 20px;
+    padding: 30px !important;
+}
+
+/* Card Styling */
+.card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s;
+    margin-bottom: 20px;
+    height: 100%;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-header {
+    border-radius: 15px 15px 0 0 !important;
+    font-weight: 600;
+    padding: 15px 20px;
+}
+
+/* Grid Styling */
+#grid-container {
+    display: grid;
+    gap: 2px;
+    background: #333;
+    padding: 5px;
+    border-radius: 10px;
+    margin: 0 auto;
+}
+
+.grid-cell {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    border-radius: 5px;
+    transition: all 0.3s;
+}
+
+.cell-start { 
+    background: linear-gradient(135deg, #4CAF50, #2E7D32);
+    color: white;
+}
+
+.cell-goal { 
+    background: linear-gradient(135deg, #FF5722, #D84315);
+    color: white;
+}
+
+.cell-wall { 
+    background: #333;
+    color: white;
+}
+
+.cell-agent { 
+    background: linear-gradient(135deg, #2196F3, #0D47A1);
+    color: white;
+    animation: pulse 2s infinite;
+}
+
+.cell-empty { 
+    background: white;
+    color: #666;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Algorithm Cards */
+.algo-card {
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.3s;
+}
+
+.algo-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-3px);
+}
+
+.algo-card.selected {
+    border-color: var(--primary);
+    background: linear-gradient(135deg, rgba(74, 144, 226, 0.1), rgba(74, 144, 226, 0.2));
+    box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3);
+}
+
+/* Button Styling */
+.btn {
+    border-radius: 10px;
+    font-weight: 600;
+    padding: 12px 20px;
+    transition: all 0.3s;
+    border: none;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, var(--success), #2E8B57);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, var(--danger), #C41E3A);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), #1E3A8A);
+}
+
+/* Progress Bar */
+.progress {
+    height: 20px;
+    border-radius: 10px;
+    background: #E9ECEF;
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, #4A90E2, #50C878);
+    border-radius: 10px;
+    transition: width 0.5s ease;
+}
+
+/* Form Controls */
+.form-range::-webkit-slider-thumb {
+    background: var(--primary);
+}
+
+.form-range::-moz-range-thumb {
+    background: var(--primary);
+}
+
+/* Chart Container */
+.chart-container {
+    position: relative;
+    width: 100%;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding: 15px !important;
+    }
+    
+    .grid-cell {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+    
+    .btn {
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+}
+
+/* Utility Classes */
+.text-purple { color: #764ba2; }
+.bg-purple { background: #764ba2 !important; }
+
+/* Animation for notifications */
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.alert {
+    animation: slideIn 0.3s ease;
+}

@@ -1,0 +1,1629 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FrozenLake RL Simulator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #4cc9f0;  /* Ice blue for FrozenLake */
+            --secondary: #3a86ff;
+            --success: #38b000;
+            --danger: #ff006e;
+            --warning: #ff9e00;
+            --info: #4361ee;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #4cc9f0 0%, #3a86ff 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-bottom: 20px;
+        }
+        
+        .dashboard-container {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            max-width: 95%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .grid-container {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        
+        .grid-world {
+            display: inline-grid;
+            gap: 2px;
+            background: #56cfe1;
+            padding: 3px;
+            border-radius: 6px;
+            margin: 10px auto;
+        }
+        
+        .grid-cell {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+            transition: all 0.2s;
+            border-radius: 4px;
+        }
+        
+        .policy-grid-cell {
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            background: white;
+            border-radius: 3px;
+        }
+        
+        .value-grid-cell {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            border-radius: 4px;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        .cell-start {
+            background: linear-gradient(135deg, #38b000, #2d9100);
+            color: white;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+        }
+        
+        .cell-goal {
+            background: linear-gradient(135deg, #ff9e00, #e68900);
+            color: white;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+        }
+        
+        .cell-hole {
+            background: linear-gradient(135deg, #ff006e, #d9005e);
+            color: white;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
+        }
+        
+        .cell-agent {
+            background: linear-gradient(135deg, #3a86ff, #2667cc);
+            color: white;
+            animation: pulse 1s infinite;
+            box-shadow: 0 0 10px rgba(58, 134, 255, 0.5);
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .cell-ice {
+            background: linear-gradient(135deg, #a8dadc, #8bc6c8);
+            color: #1d3557;
+            box-shadow: inset 0 0 3px rgba(29, 53, 87, 0.2);
+        }
+        
+        .cell-frozen {
+            background: linear-gradient(135deg, #caf0f8, #ade8f4);
+            color: #1d3557;
+        }
+        
+        .cell-policy {
+            background: linear-gradient(135deg, #ff9e00, #ee8e00);
+            color: white;
+            font-weight: bold;
+        }
+        
+        .control-card {
+            background: white;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 15px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.06);
+        }
+        
+        .algorithm-card {
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+        }
+        
+        .algorithm-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+            background: white;
+        }
+        
+        .algorithm-card.selected {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(76, 201, 240, 0.08), rgba(58, 134, 255, 0.04));
+            box-shadow: 0 4px 12px rgba(76, 201, 240, 0.15);
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+        
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(76, 201, 240, 0.25);
+        }
+        
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(76, 201, 240, 0.3);
+        }
+        
+        .parameter-slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e0e0e0;
+            outline: none;
+            margin: 8px 0;
+        }
+        
+        .parameter-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .chart-container {
+            height: 200px;
+            background: white;
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .policy-container {
+            height: 200px;
+            background: white;
+            border-radius: 8px;
+            padding: 12px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .value-container {
+            height: 200px;
+            background: white;
+            border-radius: 8px;
+            padding: 12px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .training-status {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary);
+            background: rgba(76, 201, 240, 0.1);
+            padding: 6px 12px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        
+        .section-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 5px;
+        }
+        
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .legend-color {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        
+        .reward-info {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+        }
+        
+        .reward-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .reward-item:last-child {
+            border-bottom: none;
+        }
+        
+        .progress-container {
+            margin: 10px 0;
+        }
+        
+        .progress {
+            height: 20px;
+            border-radius: 10px;
+        }
+        
+        .progress-bar {
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .test-results-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .test-result-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .test-result-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .test-result-label {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+        
+        .bottom-info-card {
+            margin-top: 15px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 1px solid #dee2e6;
+        }
+        
+        .container {
+            max-width: 95%;
+        }
+        
+        .main-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-top: 10px;
+        }
+        
+        .main-header h1 {
+            color: white;
+            font-size: 2.2rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 5px;
+        }
+        
+        .main-header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .slippery-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        .algorithm-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .algorithm-tab {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            transition: all 0.2s;
+        }
+        
+        .algorithm-tab:hover {
+            background: #e9ecef;
+        }
+        
+        .algorithm-tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .value-legend {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+            font-size: 0.8rem;
+        }
+        
+        .color-gradient {
+            width: 100%;
+            height: 15px;
+            background: linear-gradient(to right, #ff0000, #ffff00, #00ff00);
+            border-radius: 3px;
+            margin: 0 10px;
+        }
+        
+        .visualization-tabs {
+            display: flex;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .viz-tab {
+            padding: 8px 16px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-size: 0.9rem;
+        }
+        
+        .viz-tab:hover {
+            background: #f8f9fa;
+        }
+        
+        .viz-tab.active {
+            border-bottom-color: var(--primary);
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        #nsteps-container {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Header -->
+    <div class="main-header">
+        <h1><i class="fas fa-snowflake me-2"></i>FrozenLake RL Simulator</h1>
+        <p>Navigate across a frozen lake avoiding holes to reach the goal</p>
+    </div>
+    
+    <div class="container-fluid py-2">
+        <div class="dashboard-container">
+            <!-- Status Header -->
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <div class="training-status" id="training-status">
+                        <i class="fas fa-circle text-success me-2"></i>Ready
+                    </div>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="text-muted">
+                        <small><i class="fas fa-clock me-1"></i> Real-time Training Monitor</small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Content in 2 Columns -->
+            <div class="row">
+                <!-- Left Column: Grid and Training -->
+                <div class="col-lg-8">
+                    <div class="row">
+                        <!-- Grid Display -->
+                        <div class="col-md-6">
+                            <div class="grid-container mb-3">
+                                <h5 class="section-title">
+                                    <i class="fas fa-icicles me-2"></i>FrozenLake Environment
+                                </h5>
+                                <div class="text-center">
+                                    <div id="grid-display" class="mb-2"></div>
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <button class="btn btn-outline-primary w-100 btn-sm" onclick="newLake()">
+                                                <i class="fas fa-sync-alt me-1"></i>New Lake
+                                            </button>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text">Size</span>
+                                                <input type="number" id="lake-size" class="form-control" value="4" min="4" max="8">
+                                                <button class="btn btn-primary btn-sm" onclick="changeLakeSize()">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="slippery-toggle mt-3">
+                                        <span>Slippery Surface:</span>
+                                        <label class="switch">
+                                            <input type="checkbox" id="slippery-toggle" checked>
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Reward Information -->
+                            <div class="control-card">
+                                <h5 class="section-title">
+                                    <i class="fas fa-coins me-2"></i>Reward System
+                                </h5>
+                                <div class="reward-info">
+                                    <div class="reward-item">
+                                        <span>Reaching Goal</span>
+                                        <span class="fw-bold text-success">+10.0</span>
+                                    </div>
+                                    <div class="reward-item">
+                                        <span>Falling in Hole</span>
+                                        <span class="fw-bold text-danger">-10.0</span>
+                                    </div>
+                                    <div class="reward-item">
+                                        <span>Each Step</span>
+                                        <span class="fw-bold text-warning">-0.1</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Algorithm Selection and Parameters -->
+                        <div class="col-md-6">
+                            <div class="control-card mb-3">
+                                <h5 class="section-title">
+                                    <i class="fas fa-cogs me-2"></i>Algorithm Selection
+                                </h5>
+                                <div class="algorithm-tabs">
+                                    <div class="algorithm-tab" onclick="selectAlgorithm('q-learning')">Q-Learning</div>
+                                    <div class="algorithm-tab" onclick="selectAlgorithm('sarsa')">SARSA</div>
+                                    <div class="algorithm-tab" onclick="selectAlgorithm('value-iteration')">Value Iteration</div>
+                                    <div class="algorithm-tab" onclick="selectAlgorithm('policy-iteration')">Policy Iteration</div>
+                                    <div class="algorithm-tab" onclick="selectAlgorithm('monte-carlo')">Monte Carlo</div>
+                                    <div class="algorithm-tab" onclick="selectAlgorithm('td-learning')">TD Learning</div>
+                                    <div class="algorithm-tab" onclick="selectAlgorithm('nstep-td')">N-step TD</div>
+                                </div>
+                                <div class="alert alert-info py-2 mb-0 mt-2">
+                                    <small>
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        <strong>Selected:</strong> <span id="selected-algo">None</span>
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <!-- Parameters -->
+                            <div class="control-card">
+                                <h5 class="section-title">
+                                    <i class="fas fa-sliders-h me-2"></i>Training Parameters
+                                </h5>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <small class="fw-bold">Discount (γ):</small>
+                                        <input type="range" class="parameter-slider" id="gamma" 
+                                               min="0.5" max="0.999" step="0.001" value="0.99">
+                                        <small class="text-muted d-block">γ = <span id="gamma-value">0.99</span></small>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="fw-bold">Learning Rate (α):</small>
+                                        <input type="range" class="parameter-slider" id="alpha" 
+                                               min="0.01" max="1" step="0.01" value="0.1">
+                                        <small class="text-muted d-block">α = <span id="alpha-value">0.1</span></small>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="fw-bold">Exploration (ε):</small>
+                                        <input type="range" class="parameter-slider" id="epsilon" 
+                                               min="0.01" max="0.5" step="0.01" value="0.1">
+                                        <small class="text-muted d-block">ε = <span id="epsilon-value">0.1</span></small>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="fw-bold">Episodes:</small>
+                                        <input type="range" class="parameter-slider" id="episodes" 
+                                               min="100" max="5000" step="100" value="2000">
+                                        <small class="text-muted d-block"><span id="episodes-value">2000</span> episodes</small>
+                                    </div>
+                                    <div class="col-6" id="nsteps-container">
+                                        <small class="fw-bold">N-steps:</small>
+                                        <input type="range" class="parameter-slider" id="nsteps" 
+                                               min="1" max="10" step="1" value="3">
+                                        <small class="text-muted d-block">n = <span id="nsteps-value">3</span></small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons and Statistics -->
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <div class="control-card">
+                                <div class="row g-2 mb-3">
+                                    <div class="col-md-3 col-6">
+                                        <button class="btn btn-primary-custom w-100" onclick="startTraining()" id="btn-train">
+                                            <i class="fas fa-play me-1"></i>Train
+                                        </button>
+                                    </div>
+                                    <div class="col-md-3 col-6">
+                                        <button class="btn btn-warning w-100" onclick="stopTraining()" id="btn-stop" disabled>
+                                            <i class="fas fa-stop me-1"></i>Stop
+                                        </button>
+                                    </div>
+                                    <div class="col-md-3 col-6">
+                                        <button class="btn btn-success w-100" onclick="runInference()" id="btn-inference" disabled>
+                                            <i class="fas fa-eye me-1"></i>Test Policy
+                                        </button>
+                                    </div>
+                                    <div class="col-md-3 col-6">
+                                        <button class="btn btn-info w-100" onclick="resetTraining()">
+                                            <i class="fas fa-redo me-1"></i>Reset
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Single Reward Stat Card -->
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="stat-card">
+                                            <div class="stat-value" id="stat-reward">0.00</div>
+                                            <div class="stat-label">Average Training Reward</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="progress-container">
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <small class="text-muted">Training Progress</small>
+                                                <small class="text-muted" id="progress-text">0%</small>
+                                            </div>
+                                            <div class="progress">
+                                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                                     id="progress-bar" style="width: 0%">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Test Results Section -->
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <div class="control-card">
+                                <h5 class="section-title">
+                                    <i class="fas fa-robot me-2"></i>Test Results
+                                </h5>
+                                <div class="test-results-grid">
+                                    <div class="test-result-item">
+                                        <div class="test-result-value" id="result-steps">-</div>
+                                        <div class="test-result-label">Steps</div>
+                                    </div>
+                                    <div class="test-result-item">
+                                        <div class="test-result-value" id="result-reward">-</div>
+                                        <div class="test-result-label">Reward</div>
+                                    </div>
+                                    <div class="test-result-item">
+                                        <div class="test-result-value" id="result-success">-</div>
+                                        <div class="test-result-label">Success</div>
+                                    </div>
+                                    <div class="test-result-item">
+                                        <div class="test-result-value" id="result-algorithm" style="font-size: 1.2rem;">-</div>
+                                        <div class="test-result-label">Algorithm</div>
+                                    </div>
+                                </div>
+                                <div class="text-center">
+                                    <button class="btn btn-secondary btn-sm w-50" onclick="debugPolicy()" id="btn-debug">
+                                        <i class="fas fa-bug me-1"></i>Debug Policy
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="control-card">
+                                <h5 class="section-title">
+                                    <i class="fas fa-key me-2"></i>Lake Legend
+                                </h5>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="legend">
+                                            <div class="legend-item mb-2">
+                                                <div class="legend-color cell-start"></div>
+                                                <span>S = Start</span>
+                                            </div>
+                                            <div class="legend-item mb-2">
+                                                <div class="legend-color cell-goal"></div>
+                                                <span>G = Goal</span>
+                                            </div>
+                                            <div class="legend-item mb-2">
+                                                <div class="legend-color cell-hole"></div>
+                                                <span>H = Hole</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="legend">
+                                            <div class="legend-item mb-2">
+                                                <div class="legend-color cell-agent"></div>
+                                                <span>A = Agent</span>
+                                            </div>
+                                            <div class="legend-item mb-2">
+                                                <div class="legend-color cell-ice"></div>
+                                                <span>F = Frozen</span>
+                                            </div>
+                                            <div class="legend-item mb-2">
+                                                <div class="legend-color cell-policy"></div>
+                                                <span>↑↓←→ = Policy</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Column: Training Results, Learned Policy, and Quick Start -->
+                <div class="col-lg-4">
+                    <!-- Training Results Chart -->
+                    <div class="control-card mb-3">
+                        <h5 class="section-title">
+                            <i class="fas fa-chart-line me-2"></i>Training Results
+                        </h5>
+                        <div class="chart-container">
+                            <canvas id="training-chart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Visualization Tabs -->
+                    <div class="visualization-tabs">
+                        <div class="viz-tab active" onclick="showVisualizationTab('policy')">Policy</div>
+                        <div class="viz-tab" onclick="showVisualizationTab('value')">Value Function</div>
+                    </div>
+                    
+                    <!-- Learned Policy Visualization -->
+                    <div class="control-card mb-3">
+                        <h5 class="section-title">
+                            <i class="fas fa-map-marked-alt me-2"></i>Learned Results
+                        </h5>
+                        <div id="policy-visualization" class="policy-container active">
+                            <div class="text-center">
+                                <p class="text-muted mb-2">Train an algorithm to see the learned policy</p>
+                                <div id="policy-grid" class="d-flex justify-content-center"></div>
+                            </div>
+                        </div>
+                        
+                        <div id="value-visualization" class="value-container" style="display: none;">
+                            <div class="text-center">
+                                <p class="text-muted mb-2">Train an algorithm to see the value function</p>
+                                <div id="value-grid" class="d-flex justify-content-center"></div>
+                                <div class="value-legend">
+                                    <span>Low</span>
+                                    <div class="color-gradient"></div>
+                                    <span>High</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-2">
+                            <button class="btn btn-outline-dark btn-sm w-100" onclick="visualizePolicy()" id="btn-visualize">
+                                <i class="fas fa-map me-1"></i>Visualize Results
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Info -->
+                    <div class="control-card">
+                        <h5 class="section-title">
+                            <i class="fas fa-lightbulb me-2"></i>Quick Start Guide
+                        </h5>
+                        <ol class="small ps-3 mb-0">
+                            <li class="mb-1">Select an algorithm from above</li>
+                            <li class="mb-1">Adjust parameters if needed</li>
+                            <li class="mb-1">Toggle slippery surface</li>
+                            <li class="mb-1">Click "Train" to start training</li>
+                            <li>Click "Test Policy" to see results</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bottom Section: How It Works -->
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div class="control-card bottom-info-card">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5 class="section-title">
+                                    <i class="fas fa-info-circle me-2"></i>How It Works
+                                </h5>
+                                <ul class="small ps-3 mb-0">
+                                    <li class="mb-1">Agent starts at S (top-left) and must reach G (bottom-right)</li>
+                                    <li class="mb-1">Agent receives <span class="fw-bold text-success">+10.0</span> reward for reaching goal</li>
+                                    <li class="mb-1">Falling in a hole gives <span class="fw-bold text-danger">-10.0</span> reward</li>
+                                    <li class="mb-1">Each step costs <span class="fw-bold text-warning">-0.1</span> reward</li>
+                                    <li>With slippery surface, actions have 33% chance to slip to random direction</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <h5 class="section-title">
+                                    <i class="fas fa-algorithm me-2"></i>Algorithms
+                                </h5>
+                                <ul class="small ps-3 mb-0">
+                                    <li class="mb-1"><span class="fw-bold">Q-Learning:</span> Off-policy, model-free TD</li>
+                                    <li class="mb-1"><span class="fw-bold">SARSA:</span> On-policy, model-free TD</li>
+                                    <li class="mb-1"><span class="fw-bold">Value Iteration:</span> Model-based DP</li>
+                                    <li class="mb-1"><span class="fw-bold">Policy Iteration:</span> Model-based DP</li>
+                                    <li class="mb-1"><span class="fw-bold">Monte Carlo:</span> Model-free, learns from episodes</li>
+                                    <li class="mb-1"><span class="fw-bold">TD Learning:</span> Temporal Difference learning</li>
+                                    <li><span class="fw-bold">N-step TD:</span> Multi-step temporal difference</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        let currentAlgorithm = null;
+        let isTraining = false;
+        let trainingChart = null;
+        let progressInterval = null;
+        let lakeData = null;
+        let trainingHistory = [];
+        let currentVisualization = 'policy';
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('FrozenLake RL Simulator initialized');
+            initializeLake(4, true);
+            setupChart();
+            setupEventListeners();
+            checkTrainingStatus();
+        });
+        
+        function setupChart() {
+            const ctx = document.getElementById('training-chart').getContext('2d');
+            trainingChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Episode Reward',
+                            data: [],
+                            borderColor: '#4cc9f0',
+                            backgroundColor: 'rgba(76, 201, 240, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.2,
+                            fill: true,
+                            pointRadius: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Episode',
+                                font: {
+                                    size: 11
+                                }
+                            },
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 10
+                                }
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Reward',
+                                font: {
+                                    size: 11
+                                }
+                            },
+                            beginAtZero: false,
+                            suggestedMin: -11,
+                            suggestedMax: 11,
+                            grid: {
+                                color: 'rgba(0,0,0,0.05)'
+                            },
+                            ticks: {
+                                font: {
+                                    size: 10
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function setupEventListeners() {
+            // Parameter sliders
+            ['gamma', 'alpha', 'epsilon', 'episodes', 'nsteps'].forEach(param => {
+                const slider = document.getElementById(param);
+                if (slider) {
+                    slider.addEventListener('input', function() {
+                        document.getElementById(`${param}-value`).textContent = this.value;
+                    });
+                }
+            });
+            
+            // Slippery toggle
+            document.getElementById('slippery-toggle').addEventListener('change', function() {
+                if (lakeData) {
+                    lakeData.is_slippery = this.checked;
+                }
+            });
+        }
+        
+        async function initializeLake(size, isSlippery) {
+            try {
+                const response = await fetch('/api/init_frozenlake', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        size: size, 
+                        is_slippery: isSlippery,
+                        hole_prob: 0.2 
+                    })
+                });
+                
+                lakeData = await response.json();
+                renderLake(lakeData);
+                updateStats();
+                
+                showNotification(`Lake initialized (${size}x${size})`, 'success');
+                
+            } catch (error) {
+                console.error('Error initializing lake:', error);
+                createDefaultLake(size, isSlippery);
+            }
+        }
+        
+        function createDefaultLake(size, isSlippery) {
+            lakeData = {
+                size: size,
+                start: [0, 0],
+                goal: [size-1, size-1],
+                holes: [],
+                agent_position: [0, 0],
+                hole_count: 0,
+                is_slippery: isSlippery
+            };
+            renderLake(lakeData);
+            updateStats();
+        }
+        
+        function renderLake(data) {
+            const container = document.getElementById('grid-display');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            const grid = document.createElement('div');
+            grid.className = 'grid-world';
+            grid.style.gridTemplateColumns = `repeat(${data.size}, 50px)`;
+            
+            for (let i = 0; i < data.size; i++) {
+                for (let j = 0; j < data.size; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    
+                    const isStart = i === data.start[0] && j === data.start[1];
+                    const isGoal = i === data.goal[0] && j === data.goal[1];
+                    const isAgent = i === data.agent_position[0] && j === data.agent_position[1];
+                    const isHole = data.holes?.some(h => h[0] === i && h[1] === j) || false;
+                    
+                    if (isAgent) {
+                        cell.classList.add('cell-agent');
+                        cell.innerHTML = '<i class="fas fa-robot"></i>';
+                    } else if (isStart) {
+                        cell.classList.add('cell-start');
+                        cell.textContent = 'S';
+                    } else if (isGoal) {
+                        cell.classList.add('cell-goal');
+                        cell.textContent = 'G';
+                    } else if (isHole) {
+                        cell.classList.add('cell-hole');
+                        cell.textContent = 'H';
+                    } else {
+                        cell.classList.add('cell-ice');
+                        cell.textContent = 'F';
+                    }
+                    
+                    grid.appendChild(cell);
+                }
+            }
+            
+            container.appendChild(grid);
+        }
+        
+        function updateStats() {
+            if (!lakeData) return;
+            
+            if (trainingHistory.length > 0) {
+                const avgReward = trainingHistory.reduce((a, b) => a + b, 0) / trainingHistory.length;
+                document.getElementById('stat-reward').textContent = avgReward.toFixed(2);
+            } else {
+                document.getElementById('stat-reward').textContent = '0.00';
+            }
+        }
+        
+        function selectAlgorithm(algorithm) {
+            // Update algorithm tabs
+            document.querySelectorAll('.algorithm-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            currentAlgorithm = algorithm;
+            document.getElementById('selected-algo').textContent = 
+                algorithm.replace('-', ' ').toUpperCase();
+            
+            // Show/hide N-steps parameter
+            const nstepsContainer = document.getElementById('nsteps-container');
+            if (algorithm === 'nstep-td') {
+                nstepsContainer.style.display = 'block';
+            } else {
+                nstepsContainer.style.display = 'none';
+            }
+            
+            // Enable training button
+            document.getElementById('btn-train').disabled = false;
+            
+            showNotification(`${algorithm.toUpperCase()} selected`, 'info');
+        }
+        
+        function getParameters() {
+            const params = {
+                gamma: parseFloat(document.getElementById('gamma').value),
+                alpha: parseFloat(document.getElementById('alpha').value),
+                epsilon: parseFloat(document.getElementById('epsilon').value),
+                episodes: parseInt(document.getElementById('episodes').value)
+            };
+            
+            if (currentAlgorithm === 'nstep-td') {
+                params.n_steps = parseInt(document.getElementById('nsteps').value);
+            }
+            
+            return params;
+        }
+        
+        function getSlipperyState() {
+            return document.getElementById('slippery-toggle').checked;
+        }
+        
+        async function startTraining() {
+            if (!currentAlgorithm) {
+                alert('Please select an algorithm first!');
+                return;
+            }
+            
+            const params = getParameters();
+            const isSlippery = getSlipperyState();
+            
+            isTraining = true;
+            document.getElementById('btn-train').disabled = true;
+            document.getElementById('btn-stop').disabled = false;
+            document.getElementById('btn-inference').disabled = true;
+            document.getElementById('btn-debug').disabled = true;
+            document.getElementById('btn-visualize').disabled = true;
+            document.getElementById('training-status').innerHTML = 
+                '<i class="fas fa-circle text-warning me-2"></i>Training...';
+            
+            trainingChart.data.labels = [];
+            trainingChart.data.datasets[0].data = [];
+            trainingHistory = [];
+            trainingChart.update();
+            
+            try {
+                const response = await fetch('/api/train_frozenlake', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        algorithm: currentAlgorithm,
+                        parameters: params,
+                        is_slippery: isSlippery
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                console.log('Training started:', data);
+                showNotification('Training started!', 'success');
+                
+                startProgressMonitoring();
+                
+            } catch (error) {
+                console.error('Error starting training:', error);
+                alert('Failed to start training: ' + error.message);
+                stopTraining();
+            }
+        }
+        
+        function startProgressMonitoring() {
+            if (progressInterval) clearInterval(progressInterval);
+            
+            progressInterval = setInterval(async () => {
+                try {
+                    const response = await fetch('/api/frozenlake_training_status');
+                    const status = await response.json();
+                    
+                    const progress = status.progress || 0;
+                    const progressBar = document.getElementById('progress-bar');
+                    const progressText = document.getElementById('progress-text');
+                    
+                    progressBar.style.width = `${progress}%`;
+                    progressText.textContent = `${Math.round(progress)}%`;
+                    
+                    if (status.history && status.history.rewards && status.history.rewards.length > 0) {
+                        updateChart(status.history);
+                    }
+                    
+                    if (status.is_training) {
+                        document.getElementById('training-status').innerHTML = 
+                            '<i class="fas fa-circle text-warning me-2"></i>Training...';
+                    } else {
+                        document.getElementById('training-status').innerHTML = 
+                            '<i class="fas fa-circle text-success me-2"></i>Ready';
+                    }
+                    
+                    if (progress >= 100 || !status.is_training) {
+                        if (status.results) {
+                            showNotification('Training completed!', 'success');
+                            document.getElementById('btn-inference').disabled = false;
+                            document.getElementById('btn-debug').disabled = false;
+                            document.getElementById('btn-visualize').disabled = false;
+                            document.getElementById('btn-train').disabled = false;
+                            document.getElementById('btn-stop').disabled = true;
+                        }
+                    }
+                    
+                } catch (error) {
+                    console.error('Error checking progress:', error);
+                }
+            }, 1000);
+        }
+        
+        function updateChart(history) {
+            if (!history || !history.rewards || !history.episodes) return;
+            
+            trainingChart.data.labels = history.episodes;
+            trainingChart.data.datasets[0].data = history.rewards;
+            
+            trainingHistory = history.rewards;
+            
+            trainingChart.update();
+            updateStats();
+        }
+        
+        async function stopTraining() {
+            try {
+                const response = await fetch('/api/stop_training', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                if (progressInterval) {
+                    clearInterval(progressInterval);
+                    progressInterval = null;
+                }
+                
+                isTraining = false;
+                
+                document.getElementById('btn-train').disabled = false;
+                document.getElementById('btn-stop').disabled = true;
+                document.getElementById('training-status').innerHTML = 
+                    '<i class="fas fa-circle text-success me-2"></i>Ready';
+                
+                showNotification('Training stopped', 'warning');
+                
+            } catch (error) {
+                console.error('Error stopping training:', error);
+            }
+        }
+        
+        async function runInference() {
+            if (!currentAlgorithm) {
+                alert('Please train an algorithm first!');
+                return;
+            }
+            
+            try {
+                document.getElementById('training-status').innerHTML = 
+                    '<i class="fas fa-circle text-info me-2"></i>Testing...';
+                
+                const response = await fetch('/api/run_frozenlake_inference', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        start_state: [0, 0]
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                document.getElementById('result-steps').textContent = data.steps;
+                document.getElementById('result-reward').textContent = data.total_reward.toFixed(2);
+                document.getElementById('result-success').textContent = data.success ? '✓ Yes' : '✗ No';
+                document.getElementById('result-algorithm').textContent = data.algorithm || currentAlgorithm;
+                
+                if (data.trajectory) {
+                    showTrajectory(data.trajectory);
+                }
+                
+                document.getElementById('training-status').innerHTML = 
+                    '<i class="fas fa-circle text-success me-2"></i>Ready';
+                
+                showNotification(`Test complete! Steps: ${data.steps}`, 'success');
+                
+            } catch (error) {
+                console.error('Error running inference:', error);
+                alert('Failed to test policy: ' + error.message);
+                document.getElementById('training-status').innerHTML = 
+                    '<i class="fas fa-circle text-success me-2"></i>Ready';
+            }
+        }
+        
+        function showTrajectory(trajectory) {
+            if (!trajectory || !lakeData) return;
+            
+            lakeData.agent_position = [0, 0];
+            renderLake(lakeData);
+            
+            let step = 0;
+            const interval = setInterval(() => {
+                if (step < trajectory.length && lakeData) {
+                    lakeData.agent_position = trajectory[step];
+                    renderLake(lakeData);
+                    step++;
+                } else {
+                    clearInterval(interval);
+                }
+            }, 300);
+        }
+        
+        async function debugPolicy() {
+            try {
+                const response = await fetch('/api/debug_frozenlake_policy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                if (data.policy_grid) {
+                    console.log("Policy grid:", data.policy_grid);
+                    console.log("Raw policy:", data.policy);
+                    
+                    let policyStr = "Learned Policy Grid:\n";
+                    for (let i = 0; i < data.policy_grid.length; i++) {
+                        policyStr += data.policy_grid[i].join(' ') + '\n';
+                    }
+                    console.log(policyStr);
+                    
+                    alert("Policy debug info logged to console. Check browser console (F12) for details.");
+                }
+            } catch (error) {
+                console.error('Debug error:', error);
+                alert('Debug failed: ' + error.message);
+            }
+        }
+        
+        function showVisualizationTab(tab) {
+    currentVisualization = tab;
+    
+    // Update tab styles
+    document.querySelectorAll('.viz-tab').forEach(t => {
+        t.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    
+    // Show/hide containers
+    document.getElementById('policy-visualization').style.display = 
+        (tab === 'policy') ? 'block' : 'none';
+    document.getElementById('value-visualization').style.display = 
+        (tab === 'value') ? 'block' : 'none';
+    
+    // Load data based on tab
+    if (tab === 'policy') {
+        visualizePolicy();
+    } else if (tab === 'value') {
+        visualizeValueFunction();
+    }
+}
+        
+        async function visualizePolicy() {
+    try {
+        // Use FrozenLake-specific endpoint
+        const response = await fetch('/api/debug_frozenlake_policy', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
+                if (data.policy_grid) {
+                    // Create policy grid visualization
+                    const container = document.getElementById('policy-grid');
+                    container.innerHTML = '';
+                    
+                    const grid = document.createElement('div');
+                    grid.className = 'grid-world';
+                    grid.style.gridTemplateColumns = `repeat(${data.size}, 35px)`;
+                    
+                    for (let i = 0; i < data.size; i++) {
+                        for (let j = 0; j < data.size; j++) {
+                            const cell = document.createElement('div');
+                            cell.className = 'policy-grid-cell';
+                            
+                            const policySymbol = data.policy_grid[i][j];
+                            const isStart = i === 0 && j === 0;
+                            const isGoal = i === data.size-1 && j === data.size-1;
+                            const isHole = data.holes?.some(h => h[0] === i && h[1] === j) || 
+                                         lakeData?.holes?.some(h => h[0] === i && h[1] === j) || false;
+                            
+                            if (isHole) {
+                                cell.classList.add('cell-hole');
+                                cell.textContent = 'H';
+                            } else if (isStart) {
+                                cell.classList.add('cell-start');
+                                cell.textContent = 'S';
+                            } else if (isGoal) {
+                                cell.classList.add('cell-goal');
+                                cell.textContent = 'G';
+                            } else if (['↑', '↓', '←', '→'].includes(policySymbol)) {
+                                cell.classList.add('cell-policy');
+                                cell.textContent = policySymbol;
+                            } else {
+                                cell.classList.add('cell-ice');
+                                cell.textContent = policySymbol || 'F';
+                            }
+                            
+                            grid.appendChild(cell);
+                        }
+                    }
+                    
+                    container.appendChild(grid);
+                    
+                    // Also update value function visualization
+                    visualizeValueFunction();
+                    
+                    showNotification('Policy visualized', 'success');
+                }
+            } catch (error) {
+        console.error('Visualization error:', error);
+        alert('Failed to visualize policy: ' + error.message);
+    }
+}
+        
+        async function visualizeValueFunction() {
+    try {
+        // Use the FrozenLake-specific endpoint
+        const response = await fetch('/api/get_frozenlake_training_results');
+        const data = await response.json();
+        
+        if (data.error || !data.value_function) {
+            console.log('No value function data available yet');
+            return;
+        }
+        
+        const valueFunction = data.value_function;
+        const size = valueFunction.length;
+        
+        // Find min and max for color scaling
+        let minVal = Infinity;
+        let maxVal = -Infinity;
+        
+        for (let i = 0; i < size; i++) {
+            for (let j = 0; j < size; j++) {
+                const val = valueFunction[i][j];
+                if (val < minVal) minVal = val;
+                if (val > maxVal) maxVal = val;
+            }
+        }
+        
+        // Create value grid visualization
+        const container = document.getElementById('value-grid');
+        container.innerHTML = '';
+        
+        const grid = document.createElement('div');
+        grid.className = 'grid-world';
+        grid.style.gridTemplateColumns = `repeat(${size}, 45px)`;
+        
+        for (let i = 0; i < size; i++) {
+            for (let j = 0; j < size; j++) {
+                const cell = document.createElement('div');
+                cell.className = 'value-grid-cell';
+                
+                const val = valueFunction[i][j];
+                const isHole = lakeData?.holes?.some(h => h[0] === i && h[1] === j) || false;
+                const isStart = i === lakeData?.start[0] && j === lakeData?.start[1];
+                const isGoal = i === lakeData?.goal[0] && j === lakeData?.goal[1];
+                
+                if (isHole) {
+                    cell.style.background = '#ff006e';
+                    cell.textContent = 'H';
+                } else if (isStart) {
+                    cell.style.background = '#38b000';
+                    cell.textContent = 'S';
+                } else if (isGoal) {
+                    cell.style.background = '#ff9e00';
+                    cell.textContent = 'G';
+                } else {
+                    // Color based on value (red to yellow to green)
+                    const normalized = (val - minVal) / (maxVal - minVal + 1e-10);
+                    let r, g, b;
+                    
+                    if (normalized < 0.5) {
+                        // Red to Yellow
+                        r = 255;
+                        g = Math.floor(255 * (normalized * 2));
+                        b = 0;
+                    } else {
+                        // Yellow to Green
+                        r = Math.floor(255 * (2 - normalized * 2));
+                        g = 255;
+                        b = 0;
+                    }
+                    
+                    cell.style.background = `rgb(${r}, ${g}, ${b})`;
+                    cell.textContent = val.toFixed(1);
+                }
+                
+                grid.appendChild(cell);
+            }
+        }
+        
+        container.appendChild(grid);
+        
+        // Update the legend text
+        document.querySelector('#value-visualization .text-muted').textContent = 
+            `Value Function (Range: ${minVal.toFixed(2)} to ${maxVal.toFixed(2)})`;
+        
+    } catch (error) {
+        console.error('Value visualization error:', error);
+        const container = document.getElementById('value-grid');
+        container.innerHTML = '<p class="text-danger">Error loading value function. Train an algorithm first!</p>';
+    }
+}
+        
+        function resetTraining() {
+            stopTraining();
+            
+            document.getElementById('progress-bar').style.width = '0%';
+            document.getElementById('progress-text').textContent = '0%';
+            document.getElementById('result-steps').textContent = '-';
+            document.getElementById('result-reward').textContent = '-';
+            document.getElementById('result-success').textContent = '-';
+            document.getElementById('result-algorithm').textContent = '-';
+            
+            const policyContainer = document.getElementById('policy-grid');
+            policyContainer.innerHTML = '<p class="text-muted mb-2">Train an algorithm to see the learned policy</p>';
+            
+            const valueContainer = document.getElementById('value-grid');
+            valueContainer.innerHTML = '<p class="text-muted mb-2">Train an algorithm to see the value function</p>';
+            
+            trainingChart.data.labels = [];
+            trainingChart.data.datasets[0].data = [];
+            trainingChart.update();
+            
+            trainingHistory = [];
+            updateStats();
+            
+            showNotification('Training reset', 'info');
+        }
+        
+        function newLake() {
+            const size = parseInt(document.getElementById('lake-size').value) || 4;
+            const isSlippery = getSlipperyState();
+            initializeLake(size, isSlippery);
+        }
+        
+        function changeLakeSize() {
+            const size = parseInt(document.getElementById('lake-size').value);
+            if (size >= 4 && size <= 8) {
+                const isSlippery = getSlipperyState();
+                initializeLake(size, isSlippery);
+            } else {
+                alert('Lake size must be between 4 and 8');
+            }
+        }
+        
+        async function checkTrainingStatus() {
+            try {
+                const response = await fetch('/api/frozenlake_training_status');
+                const status = await response.json();
+                
+                if (status.is_training) {
+                    startProgressMonitoring();
+                }
+            } catch (error) {
+                console.error('Error checking training status:', error);
+            }
+        }
+        
+        function showNotification(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
+            toast.style.zIndex = '1060';
+            toast.style.minWidth = '250px';
+            toast.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+                    <div style="font-size: 0.9rem">${message}</div>
+                    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" style="font-size: 0.7rem"></button>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

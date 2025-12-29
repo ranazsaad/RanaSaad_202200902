@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Don't Blame The Policy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-purple: #667eea; /* Consistent purple shade */
+            --secondary-purple: #764ba2; /* Consistent purple shade */
+            --dark-purple: #5a67d8; /* Consistent purple shade */
+            --card-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary-purple) 0%, var(--secondary-purple) 100%);
+            min-height: 100vh;
+            padding-bottom: 50px;
+        }
+
+        .hero-section {
+            padding: 80px 0;
+            color: white;
+        }
+
+        .hero-content h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hero-content p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            line-height: 1.8;
+            opacity: 0.95;
+        }
+
+        .cta-buttons .btn {
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-explore {
+            background: white;
+            color: var(--primary-purple);
+            border: none;
+        }
+
+        .btn-explore:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .image-display {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .blob-container {
+            position: relative;
+            width: 520px;
+            height: 520px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Main blob shape - Much more curved */
+        .blob-image {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border-radius: 70% 30% 60% 40% / 60% 40% 60% 40%; /* More extreme curves */
+            overflow: hidden;
+            box-shadow: 
+                0 20px 40px rgba(0,0,0,0.25),
+                0 0 50px rgba(102, 126, 234, 0.25);
+            animation: gentle-sway 25s ease-in-out infinite;
+            z-index: 2;
+            border: 3px solid rgba(255, 255, 255, 0.2); /* Thinner frame */
+        }
+
+        /* Inner container for the image */
+        .image-inner {
+            position: absolute;
+            width: 112%;
+            height: 112%;
+            top: -6%;
+            left: -6%;
+            animation: gentle-rotate 45s ease-in-out infinite;
+        }
+
+        .image-inner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            animation: subtle-drift 35s ease-in-out infinite;
+            border-radius: 65% 35% 58% 42% / 58% 42% 58% 42%; /* More curved image edges */
+        }
+
+        /* Blob background glow - More curved to match */
+        .blob-glow {
+            position: absolute;
+            width: 112%;
+            height: 112%;
+            background: linear-gradient(
+                135deg, 
+                var(--primary-purple) 0%,
+                var(--secondary-purple) 100%
+            );
+            border-radius: 68% 32% 62% 38% / 62% 38% 62% 38%; /* Match extreme curves */
+            filter: blur(30px);
+            opacity: 0.35;
+            z-index: 1;
+            animation: pulse-glow 18s ease-in-out infinite;
+        }
+
+        /* Floating blobs around the main image */
+        .blob-particle {
+            position: absolute;
+            background: var(--primary-purple);
+            border-radius: 70% 30% 60% 40% / 60% 40% 60% 40%; /* Curved particles */
+            filter: blur(20px);
+            opacity: 0.25;
+            z-index: 0;
+        }
+
+        .blob-particle:nth-child(1) {
+            width: 95px;
+            height: 85px;
+            top: 8%;
+            left: 8%;
+            animation: float-particle-1 28s ease-in-out infinite;
+        }
+
+        .blob-particle:nth-child(2) {
+            width: 75px;
+            height: 65px;
+            top: 72%;
+            right: 12%;
+            animation: float-particle-2 32s ease-in-out infinite;
+        }
+
+        .blob-particle:nth-child(3) {
+            width: 115px;
+            height: 105px;
+            bottom: 8%;
+            left: 12%;
+            animation: float-particle-3 38s ease-in-out infinite;
+        }
+
+        /* Animations */
+        @keyframes gentle-sway {
+            0%, 100% {
+                transform: translateX(0) translateY(0);
+                border-radius: 70% 30% 60% 40% / 60% 40% 60% 40%;
+            }
+            33% {
+                transform: translateX(-8px) translateY(-4px);
+                border-radius: 60% 40% 70% 30% / 50% 50% 50% 50%;
+            }
+            66% {
+                transform: translateX(8px) translateY(4px);
+                border-radius: 40% 60% 30% 70% / 70% 30% 70% 30%;
+            }
+        }
+
+        /* Subtle 20-degree rotation back and forth */
+        @keyframes gentle-rotate {
+            0%, 100% {
+                transform: rotate(0deg);
+            }
+            25% {
+                transform: rotate(10deg);
+            }
+            50% {
+                transform: rotate(0deg);
+            }
+            75% {
+                transform: rotate(-10deg);
+            }
+        }
+
+        /* Image drifts gently */
+        @keyframes subtle-drift {
+            0%, 100% {
+                transform: scale(1.04) translate(0, 0);
+            }
+            25% {
+                transform: scale(1.07) translate(4px, 3px);
+            }
+            50% {
+                transform: scale(1.04) translate(-3px, 4px);
+            }
+            75% {
+                transform: scale(1.07) translate(3px, -3px);
+            }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.45;
+                transform: scale(1.06);
+            }
+        }
+
+        @keyframes float-particle-1 {
+            0%, 100% { 
+                transform: translate(0, 0);
+                border-radius: 70% 30% 60% 40% / 60% 40% 60% 40%;
+            }
+            33% { 
+                transform: translate(18px, -12px);
+                border-radius: 60% 40% 70% 30% / 50% 50% 50% 50%;
+            }
+            66% { 
+                transform: translate(-9px, 8px);
+                border-radius: 40% 60% 30% 70% / 70% 30% 70% 30%;
+            }
+        }
+
+        @keyframes float-particle-2 {
+            0%, 100% { 
+                transform: translate(0, 0);
+                border-radius: 70% 30% 60% 40% / 60% 40% 60% 40%;
+            }
+            33% { 
+                transform: translate(-14px, 13px);
+                border-radius: 60% 40% 70% 30% / 50% 50% 50% 50%;
+            }
+            66% { 
+                transform: translate(9px, -8px);
+                border-radius: 40% 60% 30% 70% / 70% 30% 70% 30%;
+            }
+        }
+
+        @keyframes float-particle-3 {
+            0%, 100% { 
+                transform: translate(0, 0);
+                border-radius: 70% 30% 60% 40% / 60% 40% 60% 40%;
+            }
+            33% { 
+                transform: translate(9px, 14px);
+                border-radius: 60% 40% 70% 30% / 50% 50% 50% 50%;
+            }
+            66% { 
+                transform: translate(-13px, -7px);
+                border-radius: 40% 60% 30% 70% / 70% 30% 70% 30%;
+            }
+        }
+
+        .section {
+            padding: 60px 0;
+            background: white;
+            margin-top: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 40px;
+            color: #2c3e50;
+            text-align: center;
+        }
+
+        .env-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .env-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            border-color: var(--primary-purple);
+        }
+
+        .env-card i {
+            font-size: 3rem;
+            color: var(--primary-purple);
+            margin-bottom: 15px;
+        }
+
+        .env-card h4 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .env-card .btn {
+            margin-top: 15px;
+            width: 100%;
+            border-radius: 25px;
+            background: var(--primary-purple);
+            border: none;
+        }
+
+        .env-card .btn:hover {
+            background: var(--dark-purple);
+        }
+
+        /* Consistent purple for all elements */
+        .nav-link.active {
+            color: var(--primary-purple) !important;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1200px) {
+            .blob-container {
+                width: 480px;
+                height: 480px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+            
+            .blob-container {
+                width: 420px;
+                height: 420px;
+            }
+            
+            .blob-particle:nth-child(1) {
+                width: 75px;
+                height: 65px;
+            }
+            
+            .blob-particle:nth-child(2) {
+                width: 65px;
+                height: 55px;
+            }
+            
+            .blob-particle:nth-child(3) {
+                width: 95px;
+                height: 85px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-section {
+                padding: 40px 0;
+            }
+            
+            .hero-content h1 {
+                font-size: 2rem;
+            }
+            
+            .blob-container {
+                width: 380px;
+                height: 380px;
+            }
+            
+            .blob-image {
+                border-width: 2px;
+            }
+            
+            .image-inner {
+                width: 108%;
+                height: 108%;
+                top: -4%;
+                left: -4%;
+            }
+            
+            @keyframes gentle-rotate {
+                0%, 100% { transform: rotate(0deg); }
+                50% { transform: rotate(8deg); }
+            }
+        }
+
+        @media (max-width: 576px) {
+            .blob-container {
+                width: 320px;
+                height: 320px;
+            }
+            
+            .blob-image {
+                border-width: 2px;
+            }
+            
+            @keyframes gentle-rotate {
+                0%, 100% { transform: rotate(0deg); }
+                50% { transform: rotate(6deg); }
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 hero-content">
+                    <h1 style="font-family: 'Bebas Neue', sans-serif;">Don't Blame The Policy</h1>                   
+                    <p>
+                        Explore and visualize reinforcement learning algorithms in real-time. 
+                        Tune parameters dynamically, observe training convergence, and understand 
+                        how agents learn optimal policies through interactive experimentation.
+                    </p>
+                    <div class="cta-buttons">
+                        <button class="btn btn-explore" onclick="document.getElementById('environments').scrollIntoView({behavior: 'smooth'})">
+                            <i class="fas fa-compass"></i> Explore Algorithms
+                        </button>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="image-display">
+                        <div class="blob-container">
+                            <!-- Floating blob particles -->
+                            <div class="blob-particle"></div>
+                            <div class="blob-particle"></div>
+                            <div class="blob-particle"></div>
+                            
+                            <!-- Main blob glow -->
+                            <div class="blob-glow"></div>
+                            
+                            <!-- Main blob image container -->
+                            <div class="blob-image">
+                                <div class="image-inner">
+                                    <img src="{{ url_for('static', filename='img/rl4.png') }}" 
+                                         alt="Reinforcement Learning Visualization">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="section" id="environments">
+            <h2 class="section-title">Select an Environment</h2>
+            <div class="row">
+                <div class="col-md-6 col-lg-3">
+                    <a href="/gridworld" style="text-decoration: none; color: inherit;">
+                        <div class="env-card">
+                            <i class="fas fa-th"></i>
+                            <h4>GridWorld</h4>
+                            <p>Classic grid-based navigation with rewards and obstacles</p>
+                            <button class="btn btn-primary">Select Environment</button>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <a href="/frozenlake" style="text-decoration: none; color: inherit;">
+                        <div class="env-card">
+                            <i class="fas fa-snowflake"></i>
+                            <h4>FrozenLake</h4>
+                            <p>Navigate across frozen lake avoiding holes to reach goal</p>
+                            <button class="btn btn-primary">Select Environment</button>
+                        </div>
+                    </a>
+                </div>
+<div class="col-md-6 col-lg-3">
+    <a href="/cliffwalking" style="text-decoration: none; color: inherit;">
+        <div class="env-card">
+            <i class="fas fa-mountain"></i>
+            <h4>Cliff Walking</h4>
+            <p>Balance risk and reward while avoiding dangerous cliffs</p>
+            <button class="btn btn-primary">Select Environment</button>
+        </div>
+    </a>
+</div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="env-card" style="opacity: 0.6;">
+                        <i class="fas fa-cogs"></i>
+                        <h4>Custom Environment</h4>
+                        <p>Design your own environment with custom rewards</p>
+                        <button class="btn btn-secondary" disabled>Coming Soon</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
